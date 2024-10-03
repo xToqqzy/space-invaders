@@ -13,17 +13,17 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")  # Set window title
 
-# Create clock object for frame control (optional)
+# Create clock object for frame control
 clock = pygame.time.Clock()
 
 # Create player instance
 player = Player()
 player_bullets = []  # List for player bullets
 
-# Create a list for enemies (initially empty)
+# Create a list for enemies
 enemies = []
 
-# Game state
+# Game state variables
 game_active = True
 game_over = False
 show_menu = False  # Flag for showing escape menu
@@ -42,58 +42,55 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit()
+            sys.exit()  # Exit the game when the window is closed
 
         # Restart the game when pressing 'R'
-        if game_over and event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                game_active = True
-                game_over = False
-                player = Player()  # Reset player
-                enemies = []  # Reset enemies
-                player_bullets = []  # Reset player bullets
+        if game_over and event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            game_active = True
+            game_over = False
+            player = Player()  # Reset player
+            enemies = []  # Reset enemies
+            player_bullets = []  # Reset player bullets
 
         # Quit the game when pressing 'Q'
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q:
-                pygame.quit()
-                sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+            pygame.quit()
+            sys.exit()
 
-        # Show the escape menu
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                show_menu = True
-                game_active = False  # Pause the game
+        # Show the escape menu when pressing 'ESC'
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            show_menu = True
+            game_active = False  # Pause the game
 
     if game_active:
         # Handle player input
-        player.handle_input()
+        player.handle_input()  # Get input for player movement
 
         # Update player movement
         player.update()
 
         # Player shooting logic
-        player_shoot_timer += delta_time
+        player_shoot_timer += delta_time  # Increase shoot timer
         if player_shoot_timer >= 0.5:  # Shoot every 0.5 seconds
-            bullet = Bullet(player.rect.centerx, player.rect.top)
-            player_bullets.append(bullet)
-            player_shoot_timer = 0  # Reset the timer
+            bullet = Bullet(player.rect.centerx, player.rect.top)  # Create a new bullet
+            player_bullets.append(bullet)  # Add bullet to the list
+            player_shoot_timer = 0  # Reset the shoot timer
 
         # Update player bullets
-        for bullet in player_bullets[:]:
+        for bullet in player_bullets[:]:  # Iterate over a copy of the list
             if bullet.update():  # Update bullet position
                 player_bullets.remove(bullet)  # Remove bullet if it goes off-screen
 
         # Enemy spawning logic
-        enemy_spawn_timer += delta_time
+        enemy_spawn_timer += delta_time  # Increase spawn timer
         if enemy_spawn_timer >= enemy_spawn_interval and len(enemies) < max_enemies:
-            enemy = Enemy()
-            enemies.append(enemy)
-            enemy_spawn_timer = 0
+            enemy = Enemy()  # Create a new enemy
+            enemies.append(enemy)  # Add enemy to the list
+            enemy_spawn_timer = 0  # Reset the spawn timer
 
         # Update enemies
         for enemy in enemies:
-            enemy.update(delta_time)
+            enemy.update(delta_time)  # Update enemy position
 
             # Check for collisions between player and enemies
             if player.rect.colliderect(enemy.rect):
@@ -106,7 +103,7 @@ while True:
                     player.add_points(250)  # Add points when an enemy is hit
                     enemy.is_alive = False  # Mark enemy as dead
                     player_bullets.remove(bullet)  # Remove bullet
-                    break
+                    break  # Exit the loop after hitting
 
             # Check for collisions between enemy bullets and player
             for bullet in enemy.bullets[:]:
@@ -117,34 +114,31 @@ while True:
                     if player.health <= 0:  # Check if player is dead
                         game_active = False
                         game_over = True
-                    break
+                    break  # Exit the loop after hit
 
         # Fill the screen with the background color
         screen.fill(BACKGROUND_COLOR)
 
-        # Draw the player on the screen
+        # Draw the player, bullets, and enemies
         player.draw(screen)
-
-        # Draw the bullets
         for bullet in player_bullets:
             bullet.draw(screen)
-
-        # Draw the enemies on the screen
         for enemy in enemies:
             enemy.draw(screen)
 
     if game_over:
         # Display the death screen
-        font = pygame.font.Font(None, 74)
-        text = font.render("Game Over", True, (255, 0, 0))
+        font = pygame.font.Font(None, 74)  # Create font object
+        text = font.render("Game Over", True, (255, 0, 0))  # Render text
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
-        screen.blit(text, text_rect)
+        screen.blit(text, text_rect)  # Draw text on screen
 
         # Display the points scored
         score_text = font.render(f"Score: {player.points}", True, (255, 255, 255))
         score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
         screen.blit(score_text, score_rect)
 
+        # Instructions for restarting or quitting
         font = pygame.font.Font(None, 36)
         restart_text = font.render("Press R to Restart or Q to Quit", True, (255, 255, 255))
         restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
