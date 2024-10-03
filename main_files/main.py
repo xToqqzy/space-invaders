@@ -37,6 +37,7 @@ max_enemies = 15  # Maximum number of enemies on the screen
 # Main game loop
 while True:
     delta_time = clock.tick(FPS) / 1000.0  # Delta time for shooting intervals
+
     # Handle events (like quitting the game)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -102,6 +103,7 @@ while True:
             # Check for collisions between player bullets and enemies
             for bullet in player_bullets[:]:
                 if bullet.rect.colliderect(enemy.rect):
+                    player.add_points(250)  # Add points when an enemy is hit
                     enemy.is_alive = False  # Mark enemy as dead
                     player_bullets.remove(bullet)  # Remove bullet
                     break
@@ -109,8 +111,12 @@ while True:
             # Check for collisions between enemy bullets and player
             for bullet in enemy.bullets[:]:
                 if bullet.rect.colliderect(player.rect):
-                    game_active = False  # Set game to inactive
-                    game_over = True  # Show game over screen
+                    player.take_damage(20)  # Reduce health by 20
+                    enemy.bullets.remove(bullet)  # Remove enemy bullet
+
+                    if player.health <= 0:  # Check if player is dead
+                        game_active = False
+                        game_over = True
                     break
 
         # Fill the screen with the background color
@@ -134,9 +140,14 @@ while True:
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
         screen.blit(text, text_rect)
 
+        # Display the points scored
+        score_text = font.render(f"Score: {player.points}", True, (255, 255, 255))
+        score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+        screen.blit(score_text, score_rect)
+
         font = pygame.font.Font(None, 36)
         restart_text = font.render("Press R to Restart or Q to Quit", True, (255, 255, 255))
-        restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+        restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
         screen.blit(restart_text, restart_rect)
 
     if show_menu:

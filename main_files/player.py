@@ -20,6 +20,10 @@ class Player:
         self.speed_y = 0  # Speed for vertical movement
         self.speed = 5    # Movement speed for both directions
 
+        # Health and points
+        self.health = 100  # Player's health
+        self.points = 0  # Player's score
+
     # Method to handle player input (moving in four directions)
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -61,3 +65,27 @@ class Player:
     # Method to draw player on the screen
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+        self.draw_health_bar(screen)  # Draw health bar beneath player
+
+    # Method to draw the health bar
+    def draw_health_bar(self, screen):
+        # Set the dimensions and position of the health bar
+        bar_width = 40  # Width of the health bar
+        bar_height = 5  # Height of the health bar
+        health_ratio = self.health / 100  # Ratio of current health to max health
+
+        # Draw the background of the health bar
+        pygame.draw.rect(screen, (255, 0, 0), (self.rect.centerx - bar_width // 2, self.rect.bottom + 5, bar_width, bar_height))
+
+        # Draw the current health
+        pygame.draw.rect(screen, (0, 255, 0), (self.rect.centerx - bar_width // 2, self.rect.bottom + 5, bar_width * health_ratio, bar_height))
+
+    # Method to take damage
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health < 0:
+            self.health = 0
+
+    # Method to add points
+    def add_points(self, points):
+        self.points += points
