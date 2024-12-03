@@ -24,8 +24,10 @@ show_menu = False
 
 player_shoot_timer = 0
 enemy_spawn_timer = 0
-enemy_spawn_interval = 0.17
-max_enemies = 15
+enemy_spawn_interval = 0.75  # Adjusted for a moderate spawn rate
+max_enemies = 12  # Increased for more action but still manageable
+
+score_font = pygame.font.Font(None, 36)
 
 while True:
     delta_time = clock.tick(FPS) / 1000.0
@@ -52,7 +54,6 @@ while True:
 
     if game_active:
         player.handle_input()
-
         player.update()
 
         player_shoot_timer += delta_time
@@ -71,7 +72,7 @@ while True:
             enemies.append(enemy)
             enemy_spawn_timer = 0
 
-        for enemy in enemies:
+        for enemy in enemies[:]:
             enemy.update(delta_time)
 
             if player.rect.colliderect(enemy.rect):
@@ -83,6 +84,7 @@ while True:
                     player.add_points(250)
                     enemy.is_alive = False
                     player_bullets.remove(bullet)
+                    enemies.remove(enemy)
                     break
 
             for bullet in enemy.bullets[:]:
@@ -102,6 +104,10 @@ while True:
             bullet.draw(screen)
         for enemy in enemies:
             enemy.draw(screen)
+
+        score_text = score_font.render(
+            f"Score: {player.points}", True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
 
     if game_over:
         font = pygame.font.Font(None, 74)
