@@ -8,7 +8,8 @@ from bullet import Bullet
 
 pygame.init()
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode(
+    (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Space Invaders")
 
 clock = pygame.time.Clock()
@@ -24,10 +25,30 @@ show_menu = False
 
 player_shoot_timer = 0
 enemy_spawn_timer = 0
-enemy_spawn_interval = 0.75  # Adjusted for a moderate spawn rate
-max_enemies = 12  # Increased for more action but still manageable
+enemy_spawn_interval = 0.75
+max_enemies = 12
 
 score_font = pygame.font.Font(None, 36)
+
+num_stars = 100
+stars = [(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
+         for _ in range(num_stars)]
+star_speed = 2
+
+
+def move_stars(stars, speed, height):
+    for i, (x, y) in enumerate(stars):
+        y += speed
+        if y > height:
+            y = 0
+            x = random.randint(0, SCREEN_WIDTH)
+        stars[i] = (x, y)
+
+
+def draw_stars(stars, surface):
+    for x, y in stars:
+        pygame.draw.circle(surface, (255, 255, 255), (x, y), 2)
+
 
 while True:
     delta_time = clock.tick(FPS) / 1000.0
@@ -51,6 +72,13 @@ while True:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             show_menu = True
             game_active = False
+
+        if event.type == pygame.VIDEORESIZE:
+            SCREEN_WIDTH, SCREEN_HEIGHT = event.size
+            screen = pygame.display.set_mode(
+                (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+            stars = [(random.randint(0, SCREEN_WIDTH), random.randint(
+                0, SCREEN_HEIGHT)) for _ in range(num_stars)]
 
     if game_active:
         player.handle_input()
@@ -97,7 +125,10 @@ while True:
                         game_over = True
                     break
 
+        move_stars(stars, star_speed, SCREEN_HEIGHT)
+
         screen.fill(BACKGROUND_COLOR)
+        draw_stars(stars, screen)
 
         player.draw(screen)
         for bullet in player_bullets:
